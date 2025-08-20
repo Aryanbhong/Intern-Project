@@ -1,4 +1,4 @@
-lets use prisma i have done this // This is your Prisma schema file,
+//lets use prisma i have done this // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
@@ -6,8 +6,8 @@ lets use prisma i have done this // This is your Prisma schema file,
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
+
 
 datasource db {
   provider = "postgresql"

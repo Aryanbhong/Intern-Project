@@ -1,210 +1,53 @@
-// // import { useState } from "react";
-// // import API from "../api";
-
-// // const Signup=() => {
-// //   const [form, setForm] = useState({ name: "", email: "", address: "", password: "" });
-// //   const [error, setError] = useState("");
-
-// //   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-// //   const handleSubmit = async (e) => {
-// //     e.preventDefault();
-// //     try {
-// //       await API.post("/auth/signup", form);
-// //       alert("Signup successful! Please login.");
-// //     } catch (err) {
-// //       setError(err.response?.data?.error || "Signup failed");
-// //     }
-// //   };
-
-// //   return (
-// //     <form onSubmit={handleSubmit}>
-// //       <h2>Signup</h2>
-// //       <input name="name" placeholder="Full Name" onChange={handleChange} />
-// //       <input name="email" placeholder="Email" onChange={handleChange} />
-// //       <input name="address" placeholder="Address" onChange={handleChange} />
-// //       <input type="password" name="password" placeholder="Password" onChange={handleChange} />
-// //       {error && <p style={{ color: "red" }}>{error}</p>}
-// //       <button type="submit">Register</button>
-// //     </form>
-// //   );
-// // }
-
-// // export default Signup;
-
-
-// import { useState } from "react";
-// import API from "../api";
-
-// const Signup = () => {
-//   const [form, setForm] = useState({
-//     name: "",
-//     email: "",
-//     address: "",
-//     password: "",
-//   });
-//   const [error, setError] = useState("");
-
-//   const handleChange = (e) =>
-//     setForm({ ...form, [e.target.name]: e.target.value });
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       await API.post("/auth/signup", form);
-//       alert("Signup successful! Please login.");
-//     } catch (err) {
-//       setError(err.response?.data?.error || "Signup failed");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-//       <form
-//         onSubmit={handleSubmit}
-//         className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md"
-//       >
-//         <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
-//           Create Account
-//         </h2>
-
-//         <input
-//           name="name"
-//           placeholder="Full Name"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         />
-//         <input
-//           name="email"
-//           placeholder="Email"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         />
-//         <input
-//           name="address"
-//           placeholder="Address"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="Password"
-//           onChange={handleChange}
-//           className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         />
-
-//         {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-//         <button
-//           type="submit"
-//           className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-//         >
-//           Register
-//         </button>
-
-//         <p className="text-sm text-gray-600 mt-4 text-center">
-//           Already have an account?{" "}
-//           <a href="/login" className="text-blue-600 hover:underline">
-//             Login here
-//           </a>
-//         </p>
-//       </form>
-//     </div>
-//   );
-// };
-
-// export default Signup;
-
 
 import { useState } from "react";
-import API from "../api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    address: "",
-    password: "",
-    role: "user", // default role
-  });
-  const [error, setError] = useState("");
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const { signup } = useAuth(); 
+  const [form, setForm] = useState({ email: "", password: "", role: "user" });
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/auth/signup", form);
-      alert("Signup successful! Please login.");
+      await signup(form.email, form.password, form.role);
+      navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed");
+      alert("Signup failed!");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
-          Create Account
-        </h2>
-
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form onSubmit={handleSubmit} className="bg-white p-8 shadow-lg rounded-lg w-96">
+        <h2 className="text-2xl font-bold mb-6">Signup</h2>
         <input
-          name="name"
-          placeholder="Full Name"
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          name="email"
+          type="email"
           placeholder="Email"
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <input
-          name="address"
-          placeholder="Address"
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+          className="w-full p-2 mb-4 border rounded"
         />
         <input
           type="password"
-          name="password"
           placeholder="Password"
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={form.password}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
+          className="w-full p-2 mb-4 border rounded"
         />
-
-        {/* Role selection */}
         <select
-          name="role"
           value={form.role}
-          onChange={handleChange}
-          className="w-full p-3 border rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={(e) => setForm({ ...form, role: e.target.value })}
+          className="w-full p-2 mb-4 border rounded"
         >
           <option value="user">User</option>
-          <option value="owner">Store Owner</option>
+          <option value="owner">Owner</option>
+          <option value="admin">Admin</option>
         </select>
-
-        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
-        >
-          Register
+        <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg">
+          Signup
         </button>
-
-        <p className="text-sm text-gray-600 mt-4 text-center">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-600 hover:underline">
-            Login here
-          </a>
-        </p>
       </form>
     </div>
   );

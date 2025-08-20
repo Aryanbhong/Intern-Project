@@ -1,96 +1,102 @@
-// import { useEffect, useState } from "react";
-// import API from "../api";
-
-// const OwnerDashboard=()=> {
-//   const [stores, setStores] = useState([]);
-
-//   useEffect(() => {
-//     API.get("/stores").then((res) => {
-//       // filter only stores where user is owner
-//       const ownerId = JSON.parse(localStorage.getItem("user"))?.id;
-//       setStores(res.data.filter((s) => s.ownerId === ownerId));
-//     });
-//   }, []);
-
-//   return (
-//     <div>
-//       <h2>My Store Ratings</h2>
-//       {stores.map((s) => (
-//         <div key={s.id}>
-//           <h3>{s.name}</h3>
-//           <p>Average Rating: {s.averageRating.toFixed(1)}</p>
-//           <ul>
-//             {s.ratings.map((r) => (
-//               <li key={r.id}>User {r.userId}: {r.score}</li>
-//             ))}
-//           </ul>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
-
-// export default OwnerDashboard;
-
-
 import { useEffect, useState } from "react";
 import API from "../api";
 
 const OwnerDashboard = () => {
-  const [stores, setStores] = useState([]);
+  const [stats, setStats] = useState({ ratings: 0, avgRating: 0, users: 0 });
+  const [ratings, setRatings] = useState([]);
+  const [filter, setFilter] = useState("");
+
+
+  const fetchData = async () => {
+    const statsRes = await API.get("/owner/stats");
+    setStats(statsRes.data);
+
+    const ratingsRes = await API.get("/owner/ratings");
+    setRatings(ratingsRes.data);
+  };
 
   useEffect(() => {
-    API.get("/stores").then((res) => {
-      const ownerId = JSON.parse(localStorage.getItem("user"))?.id;
-      setStores(res.data.filter((s) => s.ownerId === ownerId));
-    });
+    fetchData();
   }, []);
 
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
+
+  const filteredRatings = ratings.filter(
+    (r) =>
+      r.userName.toLowerCase().includes(filter.toLowerCase()) ||
+      r.comment.toLowerCase().includes(filter.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6 text-gray-800">
-          My Store Ratings
-        </h2>
+    <div className="p-6">
+  
+      <header className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Store Owner Dashboard</h2>
+        <button
+          onClick={logout}
+          className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </header>
 
-        {stores.length === 0 ? (
-          <p className="text-gray-500">You don’t have any stores yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {stores.map((s) => (
-              <div
-                key={s.id}
-                className="bg-white shadow-md rounded-2xl p-6 border border-gray-200"
-              >
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {s.name}
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  ⭐ Average Rating:{" "}
-                  <span className="font-bold text-yellow-600">
-                    {s.averageRating.toFixed(1)}
-                  </span>
-                </p>
+     
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="p-4 bg-blue-100 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Total Ratings</h3>
+          <p className="text-2xl">{stats.ratings}</p>
+        </div>
+        <div className="p-4 bg-green-100 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Average Rating</h3>
+          <p className="text-2xl">{stats.avgRating?.toFixed(1) || 0}</p>
+        </div>
+        <div className="p-4 bg-yellow-100 rounded-lg shadow">
+          <h3 className="text-lg font-semibold">Users Rated</h3>
+          <p className="text-2xl">{stats.users}</p>
+        </div>
+      </div>
 
-                <h4 className="text-gray-700 font-medium mb-2">Ratings:</h4>
-                {s.ratings.length > 0 ? (
-                  <ul className="space-y-2">
-                    {s.ratings.map((r) => (
-                      <li
-                        key={r.id}
-                        className="bg-gray-50 p-3 rounded-lg text-gray-700 border"
-                      >
-                        <span className="font-medium">User {r.userId}</span>:{" "}
-                        {r.score} / 5
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-gray-500 text-sm">No ratings yet.</p>
-                )}
-              </div>
+    
+      <input
+        type="text"
+        placeholder="Search by user or comment..."
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        className="w-full p-3 border rounded-lg mb-6"
+      />
+
+ 
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Ratings for Your Store</h3>
+        <table className="w-full border">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2 border">User</th>
+              <th className="p-2 border">Rating</th>
+              <th className="p-2 border">Comment</th>
+              <th className="p-2 border">Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredRatings.map((r) => (
+              <tr key={r.id} className="text-center">
+                <td className="p-2 border">{r.userName}</td>
+                <td className="p-2 border">{r.rating}</td>
+                <td className="p-2 border">{r.comment}</td>
+                <td className="p-2 border">
+                  {new Date(r.createdAt).toLocaleDateString()}
+                </td>
+              </tr>
             ))}
-          </div>
+          </tbody>
+        </table>
+        {filteredRatings.length === 0 && (
+          <p className="text-center text-gray-500 mt-4">No ratings found.</p>
         )}
       </div>
     </div>
